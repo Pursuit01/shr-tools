@@ -1,0 +1,24 @@
+<script>
+  function foo (option = {
+    getName () {
+      // 因为此处 this 指向全局作用域，所以 logText 也必须定义在全局
+      console.log(this);
+      logText()
+    }
+  }) {
+    const { getName } = option
+    getName()
+
+    // 如果定义在里面，会报错
+    function logText () {
+      console.log(123);
+    }
+  }
+  // logText 必须与 foo 函数同级定义，才不会报错
+  function logText () {
+    console.log(123);
+  }
+
+  foo()
+
+</script>
