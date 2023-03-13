@@ -1,0 +1,19 @@
+<input type="text" id="input">
+<script>
+  const input = document.querySelector('#input')
+  const getData = () => {
+    console.log('发送请求');
+  }
+  function debounce (fn, duration = 1000) {
+    let timer = null;
+    return () => {
+      if (timer) {
+        clearTimeout(timer)
+      }
+      timer = setTimeout(() => {
+        fn()
+      }, duration);
+    }
+  }
+  input.addEventListener('input', debounce(getData))
+</script>
