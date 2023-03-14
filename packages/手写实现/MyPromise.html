@@ -1,0 +1,99 @@
+<script>
+  class MyPromise {
+    constructor(executor) {
+      this.status = 'pending'
+      this.value = null
+      this.callbacks = []
+      executor(this.resolve.bind(this), this.reject.bind(this))
+    }
+    resolve (val) {
+      if (this.status === 'pending') {
+        this.status = 'fulfilled'
+        this.value = val
+        queueMicrotask(() => {
+          this.callbacks.forEach(callback => {
+            callback.fulfill(this.value)
+          })
+        })
+      }
+    }
+    reject (err) {
+      if (this.status === 'pending') {
+        this.status = 'rejected'
+        this.value = err
+        queueMicrotask(() => {
+          this.callbacks.forEach(callback => {
+            callback.reject(this.value)
+          })
+        })
+      }
+    }
+    then (fulfill, reject) {
+      if (typeof fulfill !== 'function') {
+        fulfill = () => { }
+      } else if (typeof reject !== 'function') {
+        reject = () => { }
+      }
+      return new MyPromise((resolve, rejected) => {
+        if (this.status === 'fulfilled') {
+          this.callbacks.push({
+            fulfill: value => {
+              let result = fulfill(value)
+              if (result instanceof MyPromise) {
+                result.then(resolve, rejected)
+              } else {
+                resolve(result)
+              }
+            }
+          })
+        } else if (this.status === 'rejected') {
+          this.callbacks.push({
+            reject: value => {
+              let result = reject(value)
+              if (result instanceof MyPromise) {
+                result.then(resolve, rejected)
+              } else {
+                resolve(result)
+              }
+            }
+          })
+        } else {
+          this.callbacks.push({
+            fulfill: value => {
+              let result = fulfill(value)
+              if (result instanceof MyPromise) {
+                result.then(resolve, rejected)
+              } else {
+                resolve(result)
+              }
+            },
+            reject: value => {
+              let result = reject(value)
+              if (result instanceof MyPromise) {
+                result.then(resolve, rejected)
+              } else {
+                resolve(result)
+              }
+            }
+          })
+        }
+      })
+    }
+  }
+  const mp = new MyPromise((resolve, reject) => {
+    resolve('123')
+  }).then(res => {
+    // console.log(res);
+    return new MyPromise((res, rej) => {
+      res('222')
+      rej(345)
+    })
+  }, err => {
+    console.log(err);
+  }).then(res => {
+    console.log(res);
+  }, err => {
+    console.log('err', err);
+  })
+  console.log(mp);
+</script>
