@@ -1,0 +1,18 @@
+<input type="text" id="input">
+<script>
+  const input = document.querySelector('#input')
+  const getData = () => {
+    console.log('发送请求');
+  }
+  function throttle (fn, duration = 1000) {
+    let prev = 0
+    return (...args) => {
+      let now = +new Date()
+      if (now - prev > duration) {
+        prev = now
+        fn.apply(this, ...args)
+      }
+    }
+  }
+  input.addEventListener('input', throttle(getData))
+</script>
